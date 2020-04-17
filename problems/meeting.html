@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <div>
+        最少需要多少个会议室？
+    </div>
+</body>
+<script>
+    const meeting = [
+      [ '00:55', '13:57' ], [ '18:19', '23:56' ],
+      [ '14:17', '21:36' ], [ '22:15', '22:31' ],
+      [ '13:54', '18:54' ], [ '16:38', '16:56' ],
+      [ '05:15', '13:50' ], [ '12:36', '20:43' ],
+      [ '16:55', '19:58' ], [ '00:19', '10:41' ],
+      [ '00:21', '09:37' ], [ '01:25', '20:39' ],
+      [ '10:20', '15:52' ], [ '16:04', '16:12' ],
+      [ '23:26', '23:41' ], [ '03:14', '15:28' ],
+      [ '06:59', '16:59' ], [ '14:45', '16:54' ],
+      [ '04:20', '09:43' ], [ '19:02', '19:16' ],
+      [ '13:37', '20:43' ], [ '16:47', '16:51' ],
+      [ '05:54', '14:56' ], [ '11:40', '13:51' ],
+      [ '20:10', '20:21' ], [ '06:54', '14:59' ],
+      [ '14:18', '17:31' ], [ '08:10', '12:45' ],
+      [ '02:14', '09:19' ], [ '23:07', '23:14' ]
+    ];
+    let newMeeting = [].concat(meeting);
+    let meetingStart = [];
+    let meetingEnd = [];
+    let room = []; // 记录房间的排列数据
+    let temporaryRoom = []; // 暂存当前会议室的会议信息
+    let indexMt = 0; // 记录当前在room指针在meeting数组的位置
+
+    let pasreIntArr = (args) => {
+        args[0] = parseInt(args[0].replace(':', ''), 10);
+        args[1] = parseInt(args[1].replace(':', ''), 10);
+        return args;
+    }
+    let formateArray = () => {
+        for(let i = 0; i< newMeeting.length; i++) {
+            newMeeting[i] = pasreIntArr(newMeeting[i])
+        }
+    }
+    formateArray();
+    // 用快速排序,将数组排序成有序的数组
+    const quickSort = (array) => {
+        const sort = (arr, left = 0, right = arr.length - 1) => {
+            if (left >= right) {//如果左边的索引大于等于右边的索引说明整理完毕
+                return;
+            }
+            let i = left;
+            let j = right;
+            const baseVal = arr[j]; // 取无序数组最后一个数为基准值
+            while (i < j) {//把所有比基准值小的数放在左边大的数放在右边
+                while (i < j && arr[i][0] <= baseVal[0]) { //找到一个比基准值大的数交换
+                    i++;
+                }
+                arr[j] = arr[i]; // 将较大的值放在右边如果没有比基准值大的数就是将自己赋值给自己（i 等于 j）
+                while (j > i && arr[j][0] >= baseVal[0]) { //找到一个比基准值小的数交换
+                    j--;
+                }
+                arr[i] = arr[j]; // 将较小的值放在左边如果没有找到比基准值小的数就是将自己赋值给自己（i 等于 j）
+            }
+            arr[j] = baseVal; // 将基准值放至中央位置完成一次循环（这时候 j 等于 i ）
+            sort(arr, left, j-1); // 将左边的无序数组重复上面的操作
+            sort(arr, j+1, right); // 将右边的无序数组重复上面的操作
+        }
+        const newArr = array.concat(); // 为了保证这个函数是纯函数拷贝一次数组
+        sort(newArr);
+        return newArr;
+    }
+
+    let sortArray = quickSort(newMeeting);
+    debugger
+    // 折半查找满足条件的数组项
+    // 找到最近就第一个结束时间的会议
+    let binary = (find, arr, low, high) => {
+        if (low <= high) {
+            if (arr[low][0] >= find && arr[low - 1][0] <= find) {  //??
+                return low;
+            }
+            if (arr[high][0] >= find && arr[high - 1][0] <= find) {
+                return high;
+            }
+            let mid = Math.ceil((high + low) / 2);
+            if (arr[mid][0] >= find && arr[mid - 1][0] <= find) {
+                return mid;
+            } else if (arr[mid][0] > find) {
+                return binary(find, arr, low, mid - 1);
+            } else {
+                return binary(find, arr, mid + 1, high);
+            }
+        }
+        return -1;
+    }
+    let findSameRoom = (findnum, arr, index) => {
+        // let endTime = arr[0][1];
+       return binary(findnum, arr, index, arr.length - 1);  // 要找到最接近第一个会议结束后开始的会议，返回会议的编号（默认都是从第二个会议开始找）
+
+    }
+    while(sortArray.length > indexMt) {  // 执行数组去选择会议室
+        let indexM = findSameRoom(sortArray[indexMt][1], sortArray, indexMt + 1);
+        if(indexM === -1) {
+            // 没找到一个满足的开始时间，说明结束的已经很接近24点了
+            let arr = [];
+            arr.push(sortArray[indexMt]);
+            temporaryRoom = arr.concat(temporaryRoom);
+            room.push(temporaryRoom);  // 存储所有的会议信息
+            temporaryRoom = []; // 清空
+            // 在暂存的数组中插入第一项
+            indexMt = indexMt + 1;
+        } else {
+            // 找到了满足条件的会员开始时间
+            sortArray[indexMt][1] = sortArray[indexM][1]; // 时间累积，都么默认更新加第一个房间里（更新结束时间）
+            // 在删除查出的元素之前先存入暂存的数组中
+            temporaryRoom.push(sortArray[indexM]);
+            // 删除掉查出的那个元素
+            sortArray.splice(indexM,1);
+        }
+    }
+    console.log('会议室分配情况是:' + room);
+    console.log('需要的房间数是:' + sortArray.length + '个');
+
+</script>
+</html>

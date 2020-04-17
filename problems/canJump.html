@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>跳跃游戏</title>
+</head>
+<body>
+    <script>
+    /*
+    *给定一个非负整数数组，你最初位于数组的第一个位置。
+    数组中的每个元素代表你在该位置可以跳跃的最大长度。
+    判断你是否能够到达最后一个位置。
+    示例 1:
+    输入: [2,3,1,1,4]
+    输出: true
+    解释: 我们可以先跳 1 步，从位置 0 到达 位置 1, 然后再从位置 1 跳 3 步到达最后一个位置。
+    示例 2:
+    输入: [3,2,1,0,4]
+    输出: false
+    解释: 无论怎样，你总会到达索引为 3 的位置。但该位置的最大跳跃长度是 0 ， 所以你永远不可能到达最后一个位置。
+    * */
+   
+    /**
+     * @param {number[]} nums
+     * @return {boolean}
+     */
+    var canJump = function(nums) {
+        // 判断能到的情况就是能到到的点对应的index加上该点上的数值，大于或者等于nums长度减去1
+        let numsLen = nums.length;
+        let max = 0;
+        for(let i = 0; i < numsLen; i++) {
+            if(max < i) {
+                return false;
+            }
+            max = Math.max(max, nums[i] + i);
+            if(max >= numsLen - 1) {
+                return true;
+            }
+        }
+        return max >= numsLen - 1;
+    };
+    let nms = [4,3,2,0,0,4];
+    canJump(nms);
+    </script>
+</body>
+</html>

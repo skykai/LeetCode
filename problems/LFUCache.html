@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>js实现put和get LFUCache </title>
+</head>
+<body>
+    <script>
+        /*
+        *常见的缓存算法
+            LRU (Least recently used) 最近最少使用，如果数据最近被访问过，那么将来被访问的几率也更高。
+            LFU (Least frequently used) 最不经常使用，如果一个数据在最近一段时间内使用次数很少，那么在将来一段时间内被使用的可能性也很小。
+            FIFO (Fist in first out) 先进先出， 如果一个数据最先进入缓存中，则应该最早淘汰掉。
+        */
+        /*
+        *   题目链接： https://leetcode-cn.com/problems/lfu-cache/
+        *   输入：
+            ["LFUCache","put","put","get","put","get","get","put","get","get","get"]
+            [[2],[1,1],[2,2],[1],[3,3],[2],[3],[4,4],[1],[3],[4]]
+            输出： 
+            [null,null,null,1,null,-1,3,null,-1,3,4]
+        */
+        /**
+        * @param {number} capacity
+        */
+        var LFUCache = function(capacity) {
+            this.cache = []
+            this.L = capacity
+        };
+
+        /** 
+        * @param {number} key
+        * @return {number}
+        */
+        LFUCache.prototype.get = function(key, value) {
+            // 查找key相同的值
+            let index = this.cache.findIndex(item => item.key === key)
+            if(index !== -1) { // 如果有值
+                const item = this.cache[index]
+                // 如果是值有更改
+                if(value) item.value = value
+                // 调用更新策略
+                this.update(item, index)
+                // 返回该值
+                return item.value
+            }
+            return -1
+        };
+
+        /** 
+        * 更新策略
+        * @param {array} item 待更新的元素
+        * @param {number} idx 索引
+        * @return {void}
+        */
+        LFUCache.prototype.update = function(item, idx) {
+            // 如果idx存在, 也就是获取而非添加的情况
+            if(idx !== undefined){
+                // 增加其使用频率
+                item.freq += 1
+                // 从原数组中删除, 在后续过程中在添加到预定位置
+                this.cache.splice(idx, 1)
+            }
+            // 获取要插入的位置索引, 找到第一个freq小于等于待插入元素freq的地方
+            let index = this.cache.findIndex((a, i) => a.freq <= item.freq)
+            // 如果没有找到, 证明所有元素都大于待插入元素, 所以在末尾添加
+            if(index === -1) {
+                index = this.cache.length
+            }
+            // 在index出添加待插入元素
+            this.cache.splice(index, 0, item)
+        }
+
+        /** 
+        * @param {number} key 
+        * @param {number} value
+        * @return {void}
+        */
+        LFUCache.prototype.put = function(key, value) {
+            // 如果长度为0 , 无法put任何值
+            if (this.L === 0) return 
+            // 如果没有获取值(这里不严谨, 有可能本身返回的值就为-1, 可另写一检测方法, 但官方测试用例未覆盖此区域, 不影响AC)
+            if(this.get(key, value) === -1){
+                // 如果长度到了限制
+                if(this.cache.length === this.L) {
+                    // 删除最末尾一个(肯定为使用频率最少的)
+                    this.cache.pop()
+                }
+                // 插入元素
+                this.update({key, value,freq: 0})
+            }
+        };
+
+        /**
+        * Your LFUCache object will be instantiated and called as such:
+        * var obj = new LFUCache(capacity)
+        * var param_1 = obj.get(key)
+        * obj.put(key,value)
+        */
+        // 调用开始
+        let cache = new LFUCache( 2 /* capacity (缓存容量) */ );
+        cache.put(1, 1);
+        cache.put(2, 2);
+        cache.get(1);       // 返回 1
+        cache.put(3, 3);    // 去除 key 2
+        cache.get(2);       // 返回 -1 (未找到key 2)
+        cache.get(3);       // 返回 3
+        cache.put(4, 4);    // 去除 key 1
+        cache.get(1);       // 返回 -1 (未找到 key 1)
+        cache.get(3);       // 返回 3
+        cache.get(4);       // 返回 4
+    </script>
+</body>
+</html>

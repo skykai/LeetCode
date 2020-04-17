@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        /*
+        *给定一个由 0 和 1 组成的矩阵，找出每个元素到最近的 0 的距离。
+        两个相邻元素间的距离为 1 。
+
+        示例 1:
+        输入:
+
+        0 0 0
+        0 1 0
+        0 0 0
+        输出:
+
+        0 0 0
+        0 1 0
+        0 0 0
+        示例 2:
+        输入:
+
+        0 0 0
+        0 1 0
+        1 1 1
+        输出:
+
+        0 0 0
+        0 1 0
+        1 2 1
+        */
+        /**
+        * @param {number[][]} matrix
+        * @return {number[][]}
+        */
+        let directionAry = [
+            [-1, 0],  // 上
+            [0, 1],   // 右
+            [1, 0],   // 下
+            [0, -1]   // 左
+        ];
+        // let set = new Set(); // 记录需要递归的坐标
+        let shouldDeep = []; // 当前的需要遍历的点的数组；
+        let indeep = 1; // 如果当前的值是1，那他距离0最小的值就是1
+        let calcuMatrix = (matrix, n, m) => {
+            // 要取循环中最小的那个
+            while(shouldDeep.length) {
+                let point = shouldDeep.shift();
+                for(let t = 0; t < 4; t++) {
+                    let x1 = point[0] + directionAry[t][0],
+                        y1 = point[1] + directionAry[t][1];
+                    // 边界情况
+                    if(x1 < 0 || x1  === n || y1 < 0 || y1 === m) {
+                        continue;
+                    } 
+                    if(matrix[x1][y1] === 0){
+                        //找到了0的位置
+                        console.log('indeep:' + x1 + '------' + y1 + '------' + indeep);
+                        let returndeep = indeep;
+                        indeep = 1;
+                        shouldDeep = [];
+                        // debugger
+                        return returndeep;
+                    } else {
+                        // if(!set.has(`${x1},${y1}`)){
+                        //     set.add(`${x1},${y1}`)
+                            shouldDeep.push([x1, y1]);
+                        // }
+                    }
+                }
+                indeep += 1;
+            }
+        }  
+        var updateMatrix = function(matrix) {
+            // 思路：
+            // 遍历matrix数组，对每个元素进行判断，如果他是0，则返回0；
+            // 如果是1，则去遍历他四个方向的元素，直达边界或者是0
+            // (每遍历一层，长度加1）
+            // 方向数组
+            let newMatrix = matrix.concat();
+            let m = matrix[0].length,
+                n = matrix.length;
+            for(let i = 0; i < n; i++) {
+                for(let j = 0; j < m; j++) {
+                    if(matrix[i][j] === 0) {
+                        newMatrix[i][j] = 0;
+                    } else {
+                        shouldDeep.push([i, j]);
+                        newMatrix[i][j] = calcuMatrix(matrix, n, m);
+                    }
+                }
+            }
+            console.log(newMatrix);
+            return newMatrix;
+        };
+        // [[1,0,1,1,0,0,1,0,0,1],[0,1,1,0,1,0,1,0,1,1],[0,0,1,0,1,0,0,1,0,0],[1,0,1,0,1,1,1,1,1,1],[0,1,0,1,1,0,0,0,0,1],[0,0,1,0,1,1,1,0,1,0],[0,1,0,1,0,1,0,0,1,1],[1,0,0,0,1,1,1,1,0,1],[1,1,1,1,1,1,1,0,1,0],[1,1,1,1,0,1,0,0,1,1]]
+        let ipt = [[1,0,1,1,0,0,1,0,0,1],
+                [0,1,1,0,1,0,1,0,1,1],
+                [0,0,1,0,1,0,0,1,0,0],
+                [1,0,1,0,1,1,1,1,1,1],
+                [0,1,0,1,1,0,0,0,0,1],
+                [0,0,1,0,1,1,1,0,1,0],
+                [0,1,0,1,0,1,0,0,1,1],
+                [1,0,0,0,1,1,1,1,0,1],
+                [1,1,1,1,1,1,1,0,1,0],
+                [1,1,1,1,0,1,0,0,1,1]];
+        // let ipt = [[1,0,0],[0,1,0],[1,1,1]];
+        updateMatrix(ipt);
+    </script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>hasGroupsSizeX</title>
+</head>
+<body>
+    
+</body>
+<script>
+    /**
+    * @param {number[]} deck
+    * @return {boolean}
+    */
+    var hasGroupsSizeX = function(deck) {
+        // 遍历一遍数组找出各个数字的个数， 在判断每个数字个数的公约数 看有没有大于1的
+        if(deck.length <= 1){
+            return false;
+        }
+        let obj = {}, arr = [], result = 1; 
+        for(let i = 0, len = deck.length; i < len; i++) {
+            if(obj[deck[i]]) {
+                obj[deck[i]] += 1;
+            } else {
+                obj[deck[i]] = 1;
+            }
+        }
+        for(let item in obj) {
+            arr.push(obj[item]);
+        }
+        if(arr.length === 1 && arr[0] > 1) {
+            return true;
+        }
+        //求最大公约数 判断值是否大于等于2
+        while(arr.length > 1){
+            let num1 = arr[0],
+                num2 = arr[1];
+
+            result = gcd(num1, num2);
+            console.log(result)
+            if(result == 1){        // 如果最大公约数已经是1了，跳出循环，减少遍历
+                return false;
+            }else{
+                arr.splice(0, 2, result);    // 迭代，继续求最大公约数
+            }
+        }
+
+    return result != 1;
+
+    }
+
+    // 求最大公约数
+    const gcd = (x, y) => {
+    return x == 0 ? y : gcd(y%x, x);
+    }
+
+    hasGroupsSizeX([1,1]);
+
+</script>
+</html>
