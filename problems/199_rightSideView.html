@@ -27,13 +27,37 @@
 		 *     this.val = val;
 		 *     this.left = this.right = null;
 		 * }
-		 */
+		*/
+		/*
+			通过遍历结合栈，每次取每一层的最后一位
+		*/
 		/**
 		 * @param {TreeNode} root
 		 * @return {number[]}
 		 */
 		var rightSideView = function(root) {
-
+        	let index = 0;
+        	let res = []; //存储每一层的数据
+        	let arr = [];
+       		if(!root) {
+       			return [];
+       		}
+        	arr.push(root);
+        	while(arr.length) {
+        		let len = arr.length;
+        		res.push(arr[len - 1].val);
+        		while(len) {
+        			let node = arr.shift();
+        			if(node.left !== null) {
+        				arr.push(node.left);
+        			}
+        			if(node.right !== null) {
+        				arr.push(node.right);
+        			}
+        			len -= 1;
+        		}
+        	}
+        	return res;
 		};
 	</script>
 </body>
